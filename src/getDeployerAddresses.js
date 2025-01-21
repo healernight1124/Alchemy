@@ -22,7 +22,7 @@ async function getDeployerAddresses(poolAddress) {
     const assetTransfers = await alchemy.core.getAssetTransfers({
       toAddress: poolAddress,
       category: ["external", "internal", "erc20", "erc721"], // Include all relevant transaction types
-      maxCount: 2, // Retrieve up to 2 transactions
+      maxCount: 5, // Retrieve up to 2 transactions
     });
 
     // Default to null if no deployer is found
@@ -40,6 +40,9 @@ async function getDeployerAddresses(poolAddress) {
 
       console.log(`Transaction Hash: ${transactionHash}`);
 
+      if (i > 0 && assetTransfers.transfers[i].hash == assetTransfers.transfers[0].hash) {
+        continue;
+      }
       // Fetch transaction receipt
       const transactionReceipt = await alchemy.core.getTransactionReceipt(transactionHash);
 
@@ -48,7 +51,10 @@ async function getDeployerAddresses(poolAddress) {
         continue;
       }
 
-      deployerAddresses[i] = transactionReceipt.from;
+      deployerAddresses[i == 0 ? 0 : 1] = transactionReceipt.from;
+      if (i > 0) {
+        break;
+      }
     }
 
     return deployerAddresses;

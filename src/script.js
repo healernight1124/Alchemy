@@ -5,7 +5,6 @@ document.getElementById("stopButton").addEventListener("click", stopSearch);
 
 const API_KEY = 'RUmrjZDO6MFnezWq8ZTt7gOiVj1NVlp5ZfQhRMff';
 const BASE_URL = 'https://public-api.dextools.io/trial';
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 const API_RATE_LIMIT = 1000;
 
 let searchInProgress = false;
@@ -107,7 +106,7 @@ function sleep(ms) {
 }
 
 async function makeApiCall(url) {
-    const proxyUrl = CORS_PROXY + url;
+    const proxyUrl = url;
     log(`Appel API vers : ${url}`);
 
     try {
@@ -144,17 +143,6 @@ async function makeApiCall(url) {
 async function getTokenHolders(chain, address, retryCount = 0) {
     try {
         const data = await makeApiCall(`${BASE_URL}/v2/token/${chain}/${address}/info`);
-
-        /*
-        {
-            "circulatingSupply": 0,
-            "totalSupply": 0,
-            "mcap": 0,
-            "fdv": 0,
-            "holders": 0,
-            "transactions": 0
-        }
-        */
         const holders = data?.data?.holders;
 
         log(`Holders trouvés pour ${address}: ${holders}`);
@@ -182,15 +170,7 @@ async function getLiquidity(poolAddress, retryCount = 0) {
     log(`Récupération de la liquidité pour le pool : ${poolAddress} (tentative ${retryCount + 1})`);
     try {
         const data = await makeApiCall(`${BASE_URL}/v2/pool/ether/${poolAddress}/liquidity`);
-        /*
-        {
-            "reserves": {
-                "mainToken": 0,
-                "sideToken": 0
-            },
-            "liquidity": 0
-        }
-        */
+   
         log(`Données de liquidité reçues : ${JSON.stringify(data)}`);
         return data?.data?.liquidity || 0;
     } catch (error) {
@@ -251,16 +231,7 @@ async function searchTokens() {
         log(`Plage de dates : ${fromDate} à ${toDate}`);
 
         const url = `${BASE_URL}/v2/pool/ether?sort=creationTime&order=desc&from=${fromDate}&to=${toDate}&page=0&pageSize=50`;
-        /*
-        {
-            "totalPages": 0,
-            "page": 0,
-            "pageSize": 0,
-            "results": [
-                "https://apiable.s3.eu-central-1.amazonaws.com/public/dextools/41a92397-5c85-47cd-a2f7-e1f4f5c827a3.json#/components/schemas/PoolListDescription"
-            ]
-        }
-        */
+        
         const data = await makeApiCall(url);
         await sleep(API_RATE_LIMIT);
 
@@ -358,6 +329,14 @@ async function searchTokens() {
                                 <div class="info-item">
                                     <div class="info-label">Wallet Next Transaction</div>
                                     <div class="info-value address">${deployers[1] || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="" style="padding: 8px; display: flex; justify-content: end; gap: 8px;">
+                                <div class="token-links">
+                                    <button class="button-hidden">Hidden</button>
+                                </div>
+                                <div class="token-links">
+                                    <button class="button-add">Add</button>
                                 </div>
                             </div>
                         `;
